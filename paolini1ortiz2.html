@@ -1,0 +1,295 @@
+<!DOCTYPE> <!--
+	Name:    Maria Paolini and Chelina Ortiz
+	File:    paolini1ortiz2.html
+	Version: 1.1
+	Date:    2018-Feb-26
+	This is some starting code for a javascript program.
+-->
+<HTML>
+<TITLE>X A R N G R A M</TITLE>
+<HEAD>
+<STYLE>
+</STYLE>
+<!-- https://codereview.stackexchange.com/questions/132125/rot13-javascript -->
+<SCRIPT>
+//    scramble, 1st anagram, 1st hint, 2nd anagram, 2nd hint
+var xarngrams = [
+	[ 'ABCD', 'CAB', 'taxi', 'BAD', 'not good' ],
+	[ 'AEHKT', 'EAT', 'consume food', 'HAT', 'wear on your head' ],
+	[ 'EILMSU', 'ELM', 'type of tree', 'SUM', 'add two numbers' ],
+	[ 'DEINPTU', 'PET', 'household animal', 'TEN', 'nine plus one' ],
+	[ 'PJLINTON', 'OIL', 'texas tea', 'TOP', 'opposite of bottom' ],
+	];
+
+var whichSolution = undefined; // is acive1 or active2
+var numSolution = undefined; //if numSolution=1 then we're using active1 else we're using active2
+var currentAnagram = undefined; // is the current anagram
+var numAnagram = undefined; //row # for selected anagram
+var answer1 = undefined, answer2 = undefined;
+
+// this function simply outputs on console.log() if a user clicks on something
+// that is currently 'disabled'.
+function ignoreClick() {
+	console.log("User clicked on " + this.id + " and it was ignored.");
+}
+// function that deletes the last character of the input string
+// when the "DEL" button is activated.
+function del(){
+	if (document.getElementById('gram'+numSolution).innerHTML.length <= 0) { // If user tries to delete
+		document.getElementById('error').innerHTML = "Cannot delete.";				 // where there are no letters.
+		document.getElementById('a8').addEventListener("click", ignoreClick, false);
+	}
+	var wholeAnagram = document.getElementById('gram'+numSolution).innerHTML; // anagram the user typed in.
+	console.log("wholeAnagram = " + wholeAnagram);
+	var anagramLength = wholeAnagram.length;	// length of the user's anagram
+	var lastLetter = wholeAnagram[anagramLength -1]; //last letter of the user's anagram.
+	console.log("anagramLength = " + anagramLength);
+	console.log("lastLetter = " + lastLetter);
+	for (var i =0; i < currentAnagram.length; i++) { //loop through the scramble selected.
+		// if the last letter in the anagram is in the scramble, then enable the id of that letter.
+		if (lastLetter == document.getElementById('a' + i).innerHTML) {
+			document.getElementById('a'+i).addEventListener('click',createAnagram, false);
+			console.log(document.getElementById('a' + i).innerHTML + ' is re-enabled');
+		}
+	}
+	// remove the last letter of the user's anagram
+	document.getElementById('gram'+numSolution).innerHTML = document.getElementById('gram'+numSolution).innerHTML.slice(0, -1);
+}
+// This function displays the hint for the anagram of the solution they are working on
+function getHint(){
+	if (numSolution == 1) { // if we are working on ID "active1" (first row)
+		console.log('showing hint 1');
+		document.getElementById('hint'+numSolution).innerHTML = xarngrams[numAnagram][2]; // show hint
+	} else if (numSolution == 2) {  // if we are working on ID "active2" (second row)
+		console.log('showing hint 2');
+		document.getElementById('hint'+numSolution).innerHTML = xarngrams[numAnagram][4];  // show hint
+	}
+}
+// this function allows the user to get a blank table to solve another anagram
+function restart() {
+	document.getElementById('active1').innerHTML = " ";
+	document.getElementById('gram1').innerHTML = "XXX";
+	document.getElementById('gram1').style.color = 'black'
+	document.getElementById('hint1').innerHTML = "";
+	document.getElementById('active1').style.background = 'white';
+
+  document.getElementById('active2').innerHTML = " ";
+  document.getElementById('gram2').innerHTML = "XXX";
+  document.getElementById('gram2').style.color = 'black';
+  document.getElementById('hint2').innerHTML = "";
+	document.getElementById('active2').style.background = 'white';
+}
+
+// This function checks the anagram created by the user against the xarnagrams
+// listed in the program and provides hints if they are wrong
+function checkAnagram() {
+	console.log(this.innerHTML + ' was just clicked and is being checked.');
+	if (this.id == "gram1") { // if the user is working on id "active1"
+		// if the user's anagram is the first anagram listed in the array, mark it as correct
+		if (document.getElementById('gram1').innerHTML == xarngrams[numAnagram][1]) {
+			console.log(this.innerHTML + ' is the first anagram listed');
+			this.style.color = 'green';
+			answer1 = true;
+	    document.getElementById(whichSolution).innerHTML = "Correct!";
+			if (answer1 == true && answer2 == false) { // check if the user has the right answer to the first anagram.
+				document.getElementById('active2').addEventListener("click", activateSolution, false); // activate "active2"
+			}
+		} else {
+				this.style.color = 'red';
+				giveInstructions('Wrong answer, click on right column for hint.');
+      }
+	}
+	if (this.id == "gram2") { // if the user is working on id "active2"
+		// if the user's anagram is the second anagram listed in the array, mark it as correct
+		if (document.getElementById('gram2').innerHTML == xarngrams[numAnagram][3]) {
+			console.log(this.innerHTML + ' is the second anagram listed');
+			this.style.color = 'green';
+			answer2 = true;
+			console.log(answer2);
+     	document.getElementById(whichSolution).innerHTML = "Correct!";
+			if (answer1 == false && answer2 == true) { // check if the user has the right answer to the second anagram.
+        document.getElementById('active1').addEventListener("click", activateSolution, false); // activate "active1"
+    	}
+		  else {
+         	  this.style.color = 'red';
+         	  giveInstructions('Wrong answer, click on right column for hint.');
+    	}
+		}
+	}
+		if (answer1 == true && answer2 == true) { // if both answers are correct
+			giveInstructions('Congratulations! Choose another anagram!');
+			for (i = 1; i < xarngrams.length+1; i++) { // re-enable the scrambles
+						 var which = "l"+i;
+						 var lelement = document.getElementById(which);
+						 lelement.innerHTML = xarngrams[i-1][0];
+						 lelement.addEventListener("click", chooseAnagram, false);
+			}
+
+	}
+}
+// this function concatenates the characters selected by the user
+// and check its length.
+function createAnagram(){
+	console.log(this.innerHTML + ' was clicked');
+	if (numSolution > 0) { // if they clicked on a row to solve.
+		var gramClick = document.getElementById('gram'+numSolution);
+		gramClick.innerHTML = gramClick.innerHTML + this.innerHTML; // append the selected letter to the user's anagram
+		giveInstructions('Click on your anagram to check your anagram or get a hint!');
+		if (gramClick.innerHTML.length == 3) { //if the anagram is 3 letters long
+			gramClick.addEventListener('click',checkAnagram, false); //allow the user to check their anagram
+		}
+		this.removeEventListener('click', createAnagram, false);//disable the last letter used
+		this.addEventListener("click", ignoreClick, false)
+		giveInstructions('Click on your anagram to check it. Click on the right column to get a hint!');
+		console.log("grammerHTML= (" + gramClick.innerHTML+") length = "+gramClick.innerHTML.length);
+		if (gramClick.innerHTML.length >= 0) { //if the user anagram is not empty
+			var hintClick = document.getElementById('hint'+numSolution);
+			hintClick.addEventListener('click',getHint, false); //enable column that shows the hint
+			gramClick.addEventListener('click',checkAnagram, false);
+		}
+	}
+}
+
+// code to "turn on" a selected scramble.
+// str is the scrambled letters we use to form anagrams.
+function doScramble(str) {
+	var el;
+	str = currentAnagram;
+	// 1) put a ' ' in each letter (ids a0 through a7)
+	for (i = 0; i <= 7; i++) {
+		document.getElementById('a'+i).innerHTML =  " ";
+	}
+	// 2) replace the spaces with each letter in 'str'
+	for (j = 0; j < str.length; j++){
+		document.getElementById('a'+j).innerHTML = str[j];
+	}
+	// 3) add the DEL elemegit nt in the last one so players
+	//    can remove a selected letter
+	el = document.getElementById('a8');
+	el.addEventListener('click', del, false);
+	// 4) add event listening for each letter (and DEL)
+	for (k=0; k <= str.length; k++) {
+		el = document.getElementById('a'+k);
+		el.addEventListener('click',createAnagram, false);
+	}
+	giveInstructions('Select a letter and create your 3 letter anagram!');
+}
+// This function allows to save the solution selected by the user
+// to create an anagram on.
+function activateSolution() {
+	console.log("User clicked on " + this.id);
+	giveInstructions('Click on the green square to begin. \n Remember you need to finish this anagram before going to the next one.');
+	this.innerHTML=' ';
+	// Steps needed:
+	// 1) set background color to green
+	this.style.background = 'green';
+	// 2) remove listenerings for each activation element
+//	this.removeEventListener('click', activateSolution, false);
+	if (this.id == 'active1') {
+		document.getElementById('active2').removeEventListener("click", activateSolution, false);
+	} else {
+		document.getElementById('active1').removeEventListener("click", activateSolution, false);
+	}
+// remove second?
+// pjl	this.addEventListener('click', doScramble, false);
+	// 3) set a global variable whichsolution to this.id
+	whichSolution = this.id;
+	//save the number of the solution we are working on
+	if (whichSolution == 'active1'){
+		numSolution = 1;
+	} else {
+		numSolution = 2;
+	}
+	console.log('The solution number is ' + numSolution);
+	document.getElementById('gram'+numSolution).innerHTML = ""; //change "xxx" in gram to " "
+	doScramble(currentAnagram); //use current Anagram in doScramble function
+}
+
+// This function will be called when a user selects which anagram to solve.
+// There will be an object "this" that refers to the element that
+// was clicked on.
+function chooseAnagram() {
+	restart(); // Set the solutions to be blank each time it starts on a new scramble
+	console.log("They chose anagram id " + this.id + " which is " +	this.innerHTML);
+	currentAnagram = this.innerHTML;
+	for (i=0; i < xarngrams.length; i++){
+		// Stores the location of selected scramble in the Xarngram array
+		if(currentAnagram == xarngrams[i][0]){
+			numAnagram = i;
+			console.log('Xarngram is in row '+ (numAnagram + 1));
+		}
+	}
+	this.style.color = 'green';
+	answer1 = false;
+	answer2 = false;
+	// Steps needed:
+	// 1) turn "off" anagrams.  Should not be able to click on them
+	//    after selecting one.
+	for (i = 1; i < xarngrams.length+1; i++) {
+		var which = "l"+i;
+		var lelement = document.getElementById(which);
+		lelement.removeEventListener("click", chooseAnagram, false);
+		lelement.addEventListener("click", ignoreClick, false);
+	}
+	giveInstructions('Select a solution to solve by clicking on one line above.');
+	// ............. code redacted
+	// 2) turn "on" the two solutions to work on by setting a click
+	//    listener for each activeX id.
+	document.getElementById('active1').addEventListener("click",
+	activateSolution, false);
+	document.getElementById('active2').addEventListener("click",
+	activateSolution, false);
+}
+// this function sets the information element for user instructions.
+function giveInstructions(str) {
+	document.getElementById('info').innerHTML = str;
+}
+// load function
+function load() {
+	for (i = 1; i < xarngrams.length+1; i++) {
+		var which = "l"+i;
+		var lelement = document.getElementById(which);
+		lelement.innerHTML = xarngrams[i-1][0];
+		lelement.addEventListener("click", chooseAnagram, false); //enable scrambles
+	}
+	giveInstructions("Click on an anagram on the left to start!");
+}
+
+</SCRIPT>
+</HEAD>
+
+<BODY ONLOAD="load()">
+<h1 align='center'>Welcome to X A R N G R A M</h1>
+
+<TABLE id='wholescreen' width=100%>
+<TR>
+	<TD>
+		<TABLE id='leftside' width=50%>
+			<TR><TD id="l1">ABCD</TD></TR>
+			<TR><TD id="l2">AEHKT</TD></TR>
+			<TR><TD id="l3">EILMSU</TD></TR>
+			<TR><TD id="l4">DEINPTU</TD></TR>
+			<TR><TD id="l5">PJLINTON</TD></TR>
+		</TABLE>
+	</TD>
+	<TD>
+		<TABLE id='letters' width=50% border=2>
+				<TH id='a0'>A</TH><TH id='a1'>B</TH><TH id='a2'>C</TH>
+				<TH id='a3'>D</TH><TH id='a4'>E</TH><TH id='a5'>F</TH>
+				<TH id='a6'>G</TH><TH id='a7'>H</TH><TH id='a8'>DEL</TH>
+		</TABLE>
+		<P>
+		<TABLE id='grams' width=50% border=2>
+			<TR><TD id='active1' width=10%></TD><TD id='gram1' width=15%>XXX</TD><TD
+			id='hint1' width=75%></TD></TR>
+			<TR><TD id='active2' width=10%></TD><TD id='gram2'>XXX</TD><TD id='hint2'></TD></TR>
+			<TR></TR>
+		</TABLE>
+		</P>
+	</TD>
+</TR>
+</TABLE>
+<P id='info'>Click on an anagram on the left to start!</P>
+<p id='error'></p>
+</BODY>
+</HTML>
